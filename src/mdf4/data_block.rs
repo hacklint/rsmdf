@@ -4,12 +4,14 @@ use super::{
     dl_block::Dlblock,
     dt_block::Dtblock,
     dz_block::Dzblock,
+    hl_block::Hlblock
 };
 
 pub enum DataBlockType {
     Block(Dtblock),
     BlockComp(Dzblock),
     List(Dlblock),
+    BlockHeader(Hlblock),
 }
 
 impl DataBlockType {
@@ -28,6 +30,7 @@ impl DataBlockType {
 
                 data
             }
+            Self::BlockHeader(block) => block.data_array(stream, little_endian)
         }
     }
 
@@ -47,7 +50,11 @@ impl DataBlockType {
                 let (_pos, block) = Dlblock::read(stream, position, little_endian);
                 Self::List(block)
             }
-            "##HL" => todo!(),
+            "##HL" => {
+                let (_pos, block) = Hlblock::read(stream, position, little_endian);
+                Self::BlockHeader(block)
+            }
+//            "##HL" => todo!(),
             _ => panic!("Error: wrong block type for data block"),
         };
 

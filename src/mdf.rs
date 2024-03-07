@@ -35,7 +35,11 @@ impl MDFType {
         let _id_reserved2: [u8; 34] = utils::read(&id_stream, little_endian, &mut pos);
 
         if !utils::eq(&id_file, &[b'M', b'D', b'F', b' ', b' ', b' ', b' ', b' ']) {
-            panic!("Error: Unknown file type");
+            if !utils::eq(&id_file, &[b'U', b'n', b'F', b'i', b'n', b'M', b'F', b' ']) {
+                panic!("Error: Unknown file type");
+            } else {
+                println!("Trying to read UnFinMF type MDF file - no promises...!")
+            }
         }
 
         let s = String::from_utf8_lossy(&id_vers).into_owned();

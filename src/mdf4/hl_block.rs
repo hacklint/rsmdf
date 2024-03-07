@@ -1,12 +1,12 @@
 use crate::utils;
 
-use super::block::Block;
+use super::block::{Block, LinkedBlock, DataBlock};
 use super::block_header::*;
 use super::mdf4_enums::ZipType;
 use super::mdf4_file::link_extract;
 
 #[derive(Debug, Clone, PartialEq)]
-struct Hlblock {
+pub struct Hlblock {
     header: BlockHeader,
     #[allow(dead_code)]
     hl_dl_first: u64,
@@ -16,6 +16,52 @@ struct Hlblock {
     hl_zip_type: ZipType,
     hl_reserved: [u8; 5],
 }
+
+impl DataBlock for Hlblock {
+    fn data_array(&self, _stream: &[u8], _little_endian: bool) -> Vec<u8> {        
+        vec![1,2,3]  // Madness but just tring to get this to compile...
+    }
+}
+
+impl LinkedBlock for Hlblock {
+    fn next(&self, stream: &[u8], little_endian: bool) -> Option<Self> {
+        if self.hl_dl_first == 0 {
+            None
+        } else {
+            let (_pos, block) = Self::read(stream, self.hl_dl_first as usize, little_endian);
+            Some(block)
+        }
+    }
+    fn list(&self, stream: &[u8], little_endian: bool) -> Vec<Self> {
+        let mut all = Vec::new();
+
+        let next = self.next(stream, little_endian);
+
+        all.push(self.clone());
+        match next {
+            None => {}
+            Some(block) => all.append(&mut block.list(stream, little_endian)),
+        }
+
+        all
+
+        // let next_block = self;
+
+        // all.push(self.clone());
+        // loop {
+        //     let next_block = next_block.next(stream, little_endian);
+
+        //     match next_block {
+        //         Some(block) => all.push(block.clone()),
+        //         None => break,
+        //     }
+        // }
+
+        // all
+    }
+}
+
+
 impl Block for Hlblock {
     fn new() -> Self {
         Self {

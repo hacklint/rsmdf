@@ -50,12 +50,13 @@ impl MDFFile for MDF4 {
 
         let (position, _id_block) = Idblock::read(&self.file, 0, little_endian);
         let (_pos, hd_block) = Hdblock::read(&self.file, position, little_endian);
-
+        println!("##HD : {:?}", hd_block); // AK
         let next_dg = hd_block.first_data_group(&self.file, little_endian);
 
         let data_groups = next_dg.list(&self.file, little_endian);
 
         for (dg_no, dg) in data_groups.iter().enumerate() {
+            println!("##DG #{}: {:?}",dg_no, dg); // AK
             let first_cg = dg.first(&self.file, little_endian);
             let channel_groups = first_cg.list(&self.file, little_endian);
 
@@ -110,12 +111,12 @@ impl MDFFile for MDF4 {
         let data = dg.read_data(&self.file, self.little_endian);
         // &self.file[dg.data_location() as usize..(dg.data_location() as usize + data_length)];
 
-        println!("Record Number: {}", channel_group.record_number());
+        println!("Cycle count: {}", channel_group.cycle_count());
 
-        let mut data_blocks: Vec<&[u8]> = vec![&[0_u8]; channel_group.record_number()];
+        let mut data_blocks: Vec<&[u8]> = vec![&[0_u8]; channel_group.cycle_count()];
         // let mut data_blocks = Vec::new();
 
-        println!("Vec len: {}", data_blocks.len());
+        println!("# read data blocks: {}", data_blocks.len());
 
         for (i, db) in data_blocks.iter_mut().enumerate() {
             *db = &data[(i * channel_group.record_size())..((i + 1) * channel_group.record_size())];
@@ -125,7 +126,7 @@ impl MDFFile for MDF4 {
 
         let mut records = Vec::new();
         let mut pos = 0;
-        for _i in 0..channel_group.record_number() {
+        for _i in 0..channel_group.cycle_count() {
             records.push(&data[pos..pos + channel_group.record_size()]);
             pos += channel_group.record_size();
         }

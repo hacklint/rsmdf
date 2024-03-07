@@ -77,7 +77,7 @@ impl Cgblock {
         (self.cg_record_id * self.cg_data_bytes as u64) as usize
     }
 
-    pub fn record_number(&self) -> usize {
+    pub fn cycle_count(&self) -> usize {
         self.cg_cycle_count as usize
     }
 
