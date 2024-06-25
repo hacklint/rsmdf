@@ -4,6 +4,7 @@ use super::{
     dl_block::Dlblock,
     dt_block::Dtblock,
     dz_block::Dzblock,
+    hl_block::Hlblock,
 };
 
 pub enum DataBlockType {
@@ -47,7 +48,11 @@ impl DataBlockType {
                 let (_pos, block) = Dlblock::read(stream, position, little_endian);
                 Self::List(block)
             }
-            "##HL" => todo!(),
+            // For a HL block, just "pass through" to the linked DL block
+            "##HL" => {
+                let (_pos, block) = Hlblock::read(stream, position, little_endian);
+                DataBlockType::read(stream, block.hl_dl_first.try_into().unwrap(), little_endian)  // Recursive, expect to get ##DL
+            },
             _ => panic!("Error: wrong block type for data block"),
         };
 

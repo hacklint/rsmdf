@@ -118,6 +118,7 @@ impl MDFFile for MDF4 {
         println!("Vec len: {}", data_blocks.len());
 
         for (i, db) in data_blocks.iter_mut().enumerate() {
+            let _s = channel_group.record_size();
             *db = &data[(i * channel_group.record_size())..((i + 1) * channel_group.record_size())];
         }
 

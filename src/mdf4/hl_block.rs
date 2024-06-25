@@ -6,10 +6,10 @@ use super::mdf4_enums::ZipType;
 use super::mdf4_file::link_extract;
 
 #[derive(Debug, Clone, PartialEq)]
-struct Hlblock {
+pub struct Hlblock {
     header: BlockHeader,
     #[allow(dead_code)]
-    hl_dl_first: u64,
+    pub hl_dl_first: u64,
     #[allow(dead_code)]
     hl_flags: u16,
     #[allow(dead_code)]
